@@ -3,10 +3,19 @@ package godogs
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/cucumber/godog"
 	"testing"
 )
+
+var opts = godog.Options{
+	Format: "pretty", // progress
+}
+
+func init() {
+	godog.BindFlags("godog.", flag.CommandLine, &opts)
+}
 
 // godogsCtxKey is the key used to store the available godogs in the context.Context.
 type godogsCtxKey struct{}
@@ -44,13 +53,14 @@ func thereShouldBeRemaining(ctx context.Context, remaining int) error {
 }
 
 func TestFeatures(t *testing.T) {
+	o := opts
+	o.Paths = []string{"features"}
+	o.TestingT = t
+
 	suite := godog.TestSuite{
+		Name:                "godogs",
 		ScenarioInitializer: InitializeScenario,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features"},
-			TestingT: t,
-		},
+		Options:             &o,
 	}
 
 	if suite.Run() != 0 {
